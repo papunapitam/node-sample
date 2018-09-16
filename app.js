@@ -1,15 +1,19 @@
 // app.js
 const express = require('express');
 const bodyParser = require('body-parser');
-const product = require('./routes/product.route');
+const productRoute = require('./routes/product.route');
+const PORT = 1234;
 
-// initialize our express app
-const app = express();
+// initialize app
+const server = express();
 
-app.use('/product', product);
+// set port
+server.set('port', process.env.PORT, PORT);
 
-let port = 1234;
+// register routes
+server.use('/product', productRoute);
 
-app.listen(port, () => {
-	console.log('Server is up and running on port number ' + port);
+// binding
+server.listen(PORT, () => {
+	console.log('Server is up and running on port number ' + PORT);
 });
