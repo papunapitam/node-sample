@@ -17,8 +17,13 @@
   },
   "homepage": "https://github.com/papunapitam/node-sample#readme",
   "dependencies": {
+    "async": "0.1.18",
     "body-parser": "^1.18.3",
+    "config": "^2.0.1",
+    "dateformat": "^3.0.3",
     "express": "^4.16.3",
-    "mongoose": "^5.2.15"
+    "mongoose": "^5.2.15",
+    "node-uuid": "^1.4.8",
+    "redis": "^2.8.0"
   }
 }

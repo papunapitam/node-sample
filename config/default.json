@@ -1,0 +1,28 @@
+{
+  "server": {
+    "port":        1234,
+    "forks":        1,
+    "siteUrl":      "http://localhost:1234"
+  },
+  "dbMysql": {
+    "host":         "localhost",
+    "port":         3306,
+    "username":     "root",
+    "password":     "",
+    "dbname":       "crudbonesdb"
+  },
+  "dbMongo": {
+    "host":         "ds031947.mongolab.com",
+    "port":         31947,
+    "username":     "alexeypro",
+    "password":     "f3900a788b4ae0bc6fe173e32451a047",
+    "dbname":       "crudbones_db"
+  },
+  "storeRedis": {
+    "host":         "gar.redistogo.com",
+    "port":         9068,
+    "username":     "alexeypro",
+    "password":     "f3900a788b4ae0bc6fe173e32451a047",
+    "dbname":       0
+  }
+}
