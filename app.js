@@ -1,9 +1,7 @@
 // app.js
-
 process.env.NODE_ENV = "default";
-console.log(process.env.NODE_ENV);
+process.env.PORT = 1234;
 
-var app,
     util            = require('util'),
     cluster         = require('cluster'),
     express         = require('express'),
@@ -11,12 +9,12 @@ var app,
     mongoose        = require('mongoose'),
     redis           = require('redis');
 
-
-var envConfig = require('config'),
+var	envConfig 		= require('config'),
     CFG_SERVER      = envConfig.server,
     CFG_DB_MYSQL    = envConfig.dbMysql,
     CFG_DB_MONGO    = envConfig.dbMongo,
     CFG_STORE_REDIS = envConfig.storeRedis;
+envConfig.dbMongo = CFG_DB_MONGO;
 
 var port            = process.env.PORT || CFG_SERVER.port,
     forks           = process.env.FORKS || CFG_SERVER.forks;
@@ -33,63 +31,65 @@ process.addListener('uncaughtException', function (err, stack) {
 
 // logger wrapper
 var logmessage = function(message) {
+	console.log(message);
     message = '#' + (process.env.NODE_WORKER_ID ? process.env.NODE_WORKER_ID : 'M') + ': ' + message;
         console.log(message);
     };
 
 // initialize app
-var app = express();
+const app = express();
+app.set('view engine', 'ejs');
+app.set('view options', {
+	layout: false
+});
 
 app.envConfig = envConfig;
-//app.defs =
-app.logmessage = logmessage;
 
-// we want to set up connections only on "workers, not on cluster/master
-    // and we want to do this in parallel, but make sure we do it before continuing with starting server..
 async.parallel({
-		mongoConnection: function(cb1) {
+		mongoConnection: function(cb2) {
 			// if mongo configuration is there...
 			if (CFG_DB_MONGO) {
-				var mongoURI = 'mongodb://' + CFG_DB_MONGO.username + ':' + CFG_DB_MONGO.password + '@' + CFG_DB_MONGO.host + ':' + CFG_DB_MONGO.port + '/' + CFG_DB_MONGO.dbname;
+				//var mongoURI = 'mongodb://' + CFG_DB_MONGO.username + ':' + CFG_DB_MONGO.password + '@' + CFG_DB_MONGO.host + ':' + CFG_DB_MONGO.port + '/' + CFG_DB_MONGO.dbname;
+				var mongoURI = 'mongodb://localhost:32772/node-sample-db';
 				logmessage('MongoDB config: ' + mongoURI);
 				var mongoClient = mongoose.createConnection(mongoURI);
-				cb1(null, mongoClient);
-			} else {
-				cb1(null, null);
-			}
-		},
-		redisConnection: function(cb2) {
-			// if redis configuration is there...
-			if (CFG_STORE_REDIS) {
-				var redisClient = redis.createClient(CFG_STORE_REDIS.port, CFG_STORE_REDIS.host);
-				redisClient.auth(CFG_STORE_REDIS.password, function() {
-					redisClient.select(CFG_STORE_REDIS.dbname, function(err,res) {
-						logmessage('Redis config: ' + redisClient.host + ':' + redisClient.port + ' @ ' + redisClient.selected_db + ' with ' + redisClient.auth_pass);
-						cb2(null, redisClient);
-					});
-				});
+				cb2(null, mongoClient);
 			} else {
 				cb2(null, null);
 			}
 		},
-	},
+		/*redisConnection: function(cb3) {
+			// if redis configuration is there...
+			if (CFG_STORE_REDIS) {
+				console.log(CFG_STORE_REDIS.port + " : " + CFG_STORE_REDIS.host);
+				var redisClient = redis.createClient(CFG_STORE_REDIS.port, CFG_STORE_REDIS.host);
+				console.log("redis inited: " + CFG_STORE_REDIS.password);
+				//redisClient.auth(CFG_STORE_REDIS.password, function() {
+					redisClient.select(CFG_STORE_REDIS.dbname, function(err,res) {
+						logmessage('Redis config: ' + redisClient.host + ':' + redisClient.port + ' @ ' + redisClient.selected_db + ' with ' + redisClient.auth_pass);
+						cb3(null, redisClient);
+					});
+				//});
+			} else {
+				cb3(null, null);
+			}
+		},
+*/	},
 	// here we get all of the connections and run the actual server
 	function(err, results) {
 		logmessage('Came back with ' + Object.keys(results).length + ' connection(s)...');
-		app.mongoClient = results.mongoConnection;
-		app.redisClient = results.redisConnection;
-
+        //app.mongoClient = results.mongoConnection;
+		//app.redisClient = results.redisConnection;
+		exports.mongoClient = results.mongoConnection;
 		// load routes
 		var productRoute = require('./routes/product.route');
 		app.use('/product', productRoute);
 
 		app.listen(port, function() {
-			app.logmessage('Listening on :' + port + ' in "' + app.settings.env + '" mode...');
+			//app.logmessage('Listening on :' + port + ' in "' + app.settings.env + '" mode...');
+			console.log('Listening on : ' + port);
 			return 0;
 		});
-	}
-	)
-;
-
+	});
 // export app everywhere
-module.exports.app = app;
+exports.app = app;

@@ -1,5 +1,3 @@
-module.exports = helper;
-
 var helper = {
 
     toUTC: function(date) {
@@ -19,3 +17,5 @@ var helper = {
     }
 
 };
+
+module.exports = helper;
